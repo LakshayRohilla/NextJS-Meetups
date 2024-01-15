@@ -1,0 +1,37 @@
+import { MongoClient } from 'mongodb';
+
+// /api/new-meetup
+// POST /api/new-meetup
+
+async function handler(req, res) {
+  if (req.method === 'POST') {
+    const data = req.body;
+
+    const client = await MongoClient.connect(
+        // here you have to ad the connection string to connect to the cluster.
+      'mongodb+srv://lakshay:arlAapzPqFyo4xUk@cluster0.ntrwp.mongodb.net/meetups?retryWrites=true&w=majority'
+      // This is something we never run on the client side. because you would expose your credentials to your visitors, 
+      // which is a security problem.
+    );
+    // Connect returns a promise.
+    const db = client.db();
+
+    const meetupsCollection = db.collection('meetups');
+    // Collection is just a doument having the data, under the hood its actually a json.
+
+    const result = await meetupsCollection.insertOne(data);
+    // insertOne is a methond to add the data in the document, one data.
+    // insertOne returns the promise, that why we need to add the await.
+
+    console.log(result);
+
+    client.close(); // To close the DB connection.
+
+    res.status(201).json({ message: 'Meetup inserted!' }); // to send back a response.
+    // You have a status method, which you can call on response to set a HTTP status code of the response which will be returned.
+    // For example, a 201 status code to indicate that something was inserted successfully.
+    // You can then chain a JSON call here to prepare the JSON data that will be added to the outgoing response.
+  }
+}
+
+export default handler;
